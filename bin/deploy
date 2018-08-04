@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+DST_REPO="git@github.com:lou-k/lou-k.github.io.git"
+DST_BRANCH="master"
+
+TMPDIR=./tmp
+
+if [ -e "$TMPDIR" ] ; then
+  echo "temporary directory $TMPDIR already exists!"
+  exit 1  
+fi
+
+gem install jekyll bundler
+
+
+git clone $DST_REPO $TMPDIR
+cd $TMPDIR
+git checkout $DST_BRANCH
+cd ..
+bundle exec jekyll build -d $TMPDIR
+cd $TMPDIR
+git add .
+
+git commit -a
+
+git push origin master
+cd ..
+rm -rf $TMPDIR
