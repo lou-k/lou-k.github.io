@@ -1,0 +1,41 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+DATE=$(date +"%Y-%m-%d")
+
+case "${1:-}" in
+	news)
+		cat <<- EOF > _news/$DATE.md
+		---
+		layout: post
+		date: $DATE
+		inline: true
+		---
+		EOF
+        mate _news/$DATE.md
+
+    ;;
+
+	post)
+		cat <<- EOF > _posts/$DATE.md
+		---
+		layout: post
+		title: Put title heere
+		tags: 
+		date: $DATE
+		redirect: enter url here if redirect
+		description: >
+		    This is an awesome post
+		---
+		EOF
+		mate _posts/$DATE.md
+    ;;
+    
+    *)
+        echo "Usage: $0 [news|post]"
+        exit 1
+    ;;
+esac
+

@@ -1,31 +1,32 @@
-#!/usr/bin/env bash
+#!/bin/bash -x
 
 set -euo pipefail
 IFS=$'\n\t'
 
-DST_REPO="git@github.com:lou-k/lou-k.github.io.git"
-DST_BRANCH="master"
+REPO_NAME="lou-k.github.io"
+DST_REPO="git@github.com:lou-k/$REPO_NAME.git"
+# DST_BRANCH="master"
 
-TMPDIR=./tmp
+TMPDIR=../$REPO_NAME
 
-if [ -e "$TMPDIR" ] ; then
-  echo "temporary directory $TMPDIR already exists!"
-  exit 1  
+if [ ! -e "$TMPDIR" ] ; then
+    echo "Cloning repo...."
+    git clone $DST_REPO $TMPDIR
 fi
 
 gem install jekyll bundler
 
-
-git clone $DST_REPO $TMPDIR
+pushd .
 cd $TMPDIR
-git checkout $DST_BRANCH
-cd ..
+git checkout master
+git pull origin master
+popd
+
 bundle exec jekyll build -d $TMPDIR
+
+pushd .
 cd $TMPDIR
 git add .
-
 git commit -a
-
 git push origin master
-cd ..
-rm -rf $TMPDIR
+popd
