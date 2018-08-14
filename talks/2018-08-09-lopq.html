@@ -118,6 +118,25 @@
 
 <p>In this talk, I will present the LOPQ paper by Kalantidis and Avrithi, and follow it with a deep dive into how we have implemented it at Curalate to power our visual search technology. By leveraging LOPQ, we reduced our storage requirements by 90% allowing us to store an index of 31 million images in 1GB of RAM and search it in a only few hundred milliseconds.</p>
 
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li>Papers discussed in the talk
+    <ul>
+      <li><a href="https://lear.inrialpes.fr/pubs/2011/JDS11/jegou_searching_with_quantization.pdf">Product Quantization for Nearest Neighbor Search</a>. J. Herve, M. Douze, and C. Schmid. TPAMI 2011.</li>
+      <li><a href="http://cache-ash04.cdn.yandex.net/download.yandex.ru/company/cvpr2012.pdf">The Inverted Multi-Index</a>. A. Babenko and V. Lempitsky. CVPR 2012.</li>
+      <li><a href="http://kaiminghe.com/publications/pami13opq.pdf">Optimized Product Quantization</a>. T. Ge, K. He, Q. Ke, and J. Sun. TPAMI 2013.</li>
+      <li><a href="http://image.ntua.gr/iva/files/lopq.pdf">Locally Optimized Product Quantization for Approximate Nearest Neighbor Search</a>. Y. Kalantidis and Y. Avrithis. CVPR 2013.</li>
+    </ul>
+  </li>
+  <li>Sofware
+    <ul>
+      <li><a href="https://github.com/facebookresearch/faiss">faiss</a> - Super fast LOPQ implementation from Facebook Research.</li>
+      <li><a href="https://github.com/yahoo/lopq">Yahoo LOPQ</a> - Yahoo’s LOPQ Implementation Used at Flickr</li>
+      <li><a href="https://github.com/dmllr/fast-lopq">Fast LOPQ</a> - A fork of Yahoo’s library written in C++</li>
+    </ul>
+  </li>
+</ul>
 
   </article>
 
