@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xml:lang="">
+    <channel>
+        <title></title>
+        <link>https://loukratz.info</link>
+        <copyright>All rights reserved.</copyright>
+        <description></description>
+        <atom:link href="https://loukratz.info/news/feed" rel="self" type="application/rss+xml" />
+        
+            <item>
+                <title>Wired</title>
+                <description>&lt;p&gt;My work at &lt;a href=&quot;http://www.curalate.com&quot;&gt;Curalate&lt;/a&gt; got a sweet write up in &lt;a href=&quot;https://www.wired.com/2014/06/curalate/&quot;&gt;Wired&lt;/a&gt;&lt;/p&gt;
+</description>
+                <pubDate>Sun, 22 Jun 2014 20:06:30 -0400</pubDate>
+                <link>https://loukratz.info/news/2014-06-23-wired</link>
+                <guid isPermaLink="true">https://loukratz.info/news/2014-06-23-wired</guid>
+            </item>
+        
+            <item>
+                <title>Emoji</title>
+                <description>&lt;p&gt;The emoji predicting neural net I built at curalate was featured in the &lt;a href=&quot;https://www.washingtonpost.com/news/the-intersect/wp/2016/02/19/the-secret-meanings-of-emoji/&quot;&gt;Washington Post&lt;/a&gt;.&lt;/p&gt;
+</description>
+                <pubDate>Fri, 19 Feb 2016 00:00:00 -0500</pubDate>
+                <link>https://loukratz.info/news/2016-02-19-emoji</link>
+                <guid isPermaLink="true">https://loukratz.info/news/2016-02-19-emoji</guid>
+            </item>
+        
+            <item>
+                <title>Mxnet</title>
+                <description>&lt;p&gt;I co-authored a blog post for &lt;a href=&quot;https://medium.com/apache-mxnet&quot;&gt;MxNet’s Blog&lt;/a&gt; on  &lt;a href=&quot;https://medium.com/apache-mxnet/how-curalate-uses-mxnet-on-aws-for-some-deep-learning-magic-d9139d84be1c&quot;&gt;How Curalate uses MXNet on AWS for Deep Learning Magic&lt;/a&gt;.&lt;/p&gt;
+</description>
+                <pubDate>Fri, 27 Jul 2018 00:00:00 -0400</pubDate>
+                <link>https://loukratz.info/news/2018-08-27-mxnet</link>
+                <guid isPermaLink="true">https://loukratz.info/news/2018-08-27-mxnet</guid>
+            </item>
+        
+            <item>
+                <title>Talk Lopq</title>
+                <description>&lt;p&gt;I’ll be presenting a talk on &lt;a href=&quot;http://image.ntua.gr/iva/files/lopq.pdf&quot;&gt;Locally Optimized Product Quantization&lt;/a&gt; for the &lt;a href=&quot;https://www.meetup.com/Papers-We-Love-Philadelphia/&quot;&gt;Papers We Love Philadelphia&lt;/a&gt; meetup on August 9, 2018. Go &lt;a href=&quot;https://www.meetup.com/Papers-We-Love-Philadelphia/events/252510571&quot;&gt;here&lt;/a&gt; to register!&lt;/p&gt;
+</description>
+                <pubDate>Sat, 04 Aug 2018 07:59:00 -0400</pubDate>
+                <link>https://loukratz.info/news/2018-08-04-talk-lopq</link>
+                <guid isPermaLink="true">https://loukratz.info/news/2018-08-04-talk-lopq</guid>
+            </item>
+        
+            <item>
+                <title>2018 08 14</title>
+                <description>&lt;p&gt;I’ve uploaded the slides and video of my &lt;a href=&quot;/talks/2018-08-09-lopq&quot;&gt;LOPQ Talk&lt;/a&gt;.&lt;/p&gt;
+</description>
+                <pubDate>Tue, 14 Aug 2018 00:00:00 -0400</pubDate>
+                <link>https://loukratz.info/news/2018-08-14</link>
+                <guid isPermaLink="true">https://loukratz.info/news/2018-08-14</guid>
+            </item>
+        
+            <item>
+                <title>2018 09 19</title>
+                <description>&lt;p&gt;I’ll be presenting &lt;em&gt;Scaling Visual Search: An R&amp;amp;D Case Study&lt;/em&gt; at &lt;a href=&quot;https://phlai.comcast.com/speakers/&quot;&gt;PHLAI&lt;/a&gt; this year.&lt;/p&gt;
+</description>
+                <pubDate>Wed, 12 Sep 2018 00:00:00 -0400</pubDate>
+                <link>https://loukratz.info/news/2018-09-19</link>
+                <guid isPermaLink="true">https://loukratz.info/news/2018-09-19</guid>
+            </item>
+        
+            <item>
+                <title>2018 09 24</title>
+                <description>&lt;p&gt;I’ve uploaded the &lt;a href=&quot;/talks/2018-09-20-RandD-Study&quot;&gt;slides&lt;/a&gt; from my &lt;a href=&quot;https://phlai.comcast.com/&quot;&gt;PHLAI&lt;/a&gt; talk &lt;em&gt;Scaling Visual Search: An R&amp;amp;D Case Study&lt;/em&gt;.&lt;/p&gt;
+</description>
+                <pubDate>Mon, 24 Sep 2018 00:00:00 -0400</pubDate>
+                <link>https://loukratz.info/news/2018-09-24</link>
+                <guid isPermaLink="true">https://loukratz.info/news/2018-09-24</guid>
+            </item>
+        
+            <item>
+                <title>2018 11 02</title>
+                <description>&lt;p&gt;I’ll be attending &lt;a href=&quot;https://2018.barcampphilly.org/&quot;&gt;barcampphilly&lt;/a&gt; on Nov. 10th and proposing a talk about AI &amp;amp; CV at Curalate.&lt;/p&gt;
+</description>
+                <pubDate>Fri, 02 Nov 2018 00:00:00 -0400</pubDate>
+                <link>https://loukratz.info/news/2018-11-02</link>
+                <guid isPermaLink="true">https://loukratz.info/news/2018-11-02</guid>
+            </item>
+        
+    </channel>
+</rss>
