@@ -6,14 +6,14 @@
   <meta name="viewport" content="width=device-width initial-scale=1" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <title>Lou Kratz | AI All Around How Curalate Accelerates Your Workflow</title>
+  <title>Lou Kratz | Compressing Recorded Lectures with CRF and ffmpeg</title>
   <meta name="description" content="Lou Kratz is a research engineer who specializes in computer vision and machine learning.
 ">
 
   <link rel="shortcut icon" href="https://lou.dev/assets/img/favicon.ico">
 
   <link rel="stylesheet" href="https://lou.dev/assets/css/main.css">
-  <link rel="canonical" href="https://lou.dev/blog/2018/ai-curalate/">
+  <link rel="canonical" href="https://lou.dev/blog/2020/class-ffmpeg/">
 </head>
 
 
@@ -95,12 +95,37 @@
         <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">AI All Around How Curalate Accelerates Your Workflow</h1>
-    <p class="post-meta">October 9, 2018</p>
+    <h1 class="post-title">Compressing Recorded Lectures with CRF and ffmpeg</h1>
+    <p class="post-meta">July 6, 2020</p>
   </header>
 
   <article class="post-content">
-    
+    <p>Last spring I was teaching Introduction to Computer Vision at Drexel when COVID-19 hit and, well, everyone had to adjust quickly. While my course always had an online section, I decided to make all of my lectures asynchronous in to provide maximum flexibility to students (and myself).</p>
+
+<p>After some prep, I booted up quicktime on my mac and screen-recorded my first lecture at 1080p. Even though quicktime encoded using H.264, the file size was <em>massive</em>: nearly 5 GB for only an hour lecture.</p>
+
+<p>No problem, I figured, probably just a high bit rate and lack of b-frames. I re-encoded it using two-pass x264 but found the result was still hundreds of megabytes.</p>
+
+<p>You might be wondering why this is a problem. Most videos are hundreds of megabytes, right? Well, I had two issues here:</p>
+<ul>
+  <li>I needed to ensure all of my students could watch the videos, and knew many of them may be in locations with poor internet access.</li>
+  <li>A lecture was <em>only</em> my slides. I average about 1 per minute, so surely I only needed 60 frames of video which should be very, very small.</li>
+</ul>
+
+<p>After some googling around, I found x264 had exactly a feature for such videos: <a href="https://trac.ffmpeg.org/wiki/Encode/H.264">Constant Rate Factor</a> (CRF) encoding.  With CRF you instruct the encoder to target a provided quality level throughout the encoding. This is great for low-motion videos like lecture slides. Since there is very little movement the CRF encoder can keep a very low bitrate and result in an extremely small file size. I have the occasional video or animation in my slides and CRF simply increases the bitrates at those times.</p>
+
+<p>On top of that, I implemented a few more tricks such as:</p>
+<ul>
+  <li>Telling x264 to optimize still images</li>
+  <li>Reducing the frame rate to 10fps</li>
+  <li>Adding fast start flags to the output file to make streaming easier and ensure compatibility with different devices.</li>
+</ul>
+
+<p>My final ffmpeg command is:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ffmpeg -i INPUT.mov -pix_fmt yuv420p -c:v libx264 -crf 18 -preset veryslow -tune stillimage -r 10 -acodec aac -b:v 48k -f mp4  -movflags +faststart OUTPUT.mp4
+</code></pre></div></div>
+
+<p>This resulting files average less than a MB per minute, most of which is audio, but have hardly any artifacts in the video.</p>
 
   </article>
 
