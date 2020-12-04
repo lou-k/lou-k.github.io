@@ -30,7 +30,8 @@ case "${1:-}" in
 		    This is an awesome post
 		---
 		EOF
-		mate _posts/$DATE.md
+		# mate _posts/$DATE.md
+		echo "New post in _posts/$DATE.md"
     ;;
     
     *)
