@@ -100,8 +100,8 @@
   </header>
 
   <article class="post-content">
-    <p>Often, I find myself copying files via ssh to a remote machine, and then shelling into that machine to organize them (or vice versa). A good example of this is how I organize my photos: I organize them into directories named <code class="highlighter-rouge">YYYY/YYYY-MM-DD/</code> based on the exif data of the file. For example:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2020
+    <p>Often, I find myself copying files via ssh to a remote machine, and then shelling into that machine to organize them (or vice versa). A good example of this is how I organize my photos: I organize them into directories named <code class="language-plaintext highlighter-rouge">YYYY/YYYY-MM-DD/</code> based on the exif data of the file. For example:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2020
 ├── 2020-11-01
 │   ├── DSC_0536.NEF
 │   ├── DSC_0537.NEF
@@ -126,11 +126,11 @@
 <p>First, I need to know in which directory the image should be copied to. <a href="https://exiftool.org/">exiftool</a> can extract the date and time of when the picture was taken:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exiftool <span class="nt">-T</span> <span class="nt">-createdate</span> <span class="nt">-d</span>  <span class="s2">"%Y-%m-%d"</span> image_file
 </code></pre></div></div>
-<p>That outputs the destination folder in <code class="highlighter-rouge">YYYY-MM-DD</code> format.</p>
+<p>That outputs the destination folder in <code class="language-plaintext highlighter-rouge">YYYY-MM-DD</code> format.</p>
 
 <p>I’ll save that in a variable, and also extract the year:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">DATE</span><span class="o">=</span><span class="k">$(</span>exiftool <span class="nt">-T</span> <span class="nt">-createdate</span> <span class="nt">-d</span>  <span class="s2">"%Y-%m-%d"</span> image_file<span class="k">)</span>
-<span class="nv">YEAR</span><span class="o">=</span><span class="k">$(</span>date <span class="nt">--date</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DATE</span><span class="s2">"</span> <span class="s2">"+%Y"</span><span class="k">)</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">DATE</span><span class="o">=</span><span class="si">$(</span>exiftool <span class="nt">-T</span> <span class="nt">-createdate</span> <span class="nt">-d</span>  <span class="s2">"%Y-%m-%d"</span> image_file<span class="si">)</span>
+<span class="nv">YEAR</span><span class="o">=</span><span class="si">$(</span><span class="nb">date</span> <span class="nt">--date</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DATE</span><span class="s2">"</span> <span class="s2">"+%Y"</span><span class="si">)</span>
 </code></pre></div></div>
 
 <h2 id="using-a-single-ssh-connection">Using A Single SSH Connection</h2>
@@ -139,15 +139,15 @@
 
 <p>There are two ways to use it. The first is to simply set the options when you form the first connection:</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-o</span> <span class="nv">ControlPath</span><span class="o">=</span>~/.ssh/control-%h-%p-%r-o <span class="nv">ControlMaster</span><span class="o">=</span>yes user@host
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-o</span> <span class="nv">ControlPath</span><span class="o">=</span>~/.ssh/control-%h-%p-%r-o <span class="nv">ControlMaster</span><span class="o">=</span><span class="nb">yes </span>user@host
 </code></pre></div></div>
 <p>and then future connections can be made with:</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-o</span> <span class="nv">ControlPath</span><span class="o">=</span>~/.ssh/control-%h-%p-%r user@host
 </code></pre></div></div>
 
-<p>The second way is more elegant IMO. Edit your <code class="highlighter-rouge">~/.ssh/config</code> file to set the control path for each host:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host host
+<p>The second way is more elegant IMO. Edit your <code class="language-plaintext highlighter-rouge">~/.ssh/config</code> file to set the control path for each host:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host host
     User user
     HostName (IP/DNS)
     ControlPath ~/.ssh/control-%h-%p-%r
@@ -167,8 +167,8 @@
 
 <p>Now, the logic to simultaneously copy and organize the files over ssh is pretty straightforward:</p>
 
-<p>First, open an ssh connection using the <code class="highlighter-rouge">ControlMaster</code> mode:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh -M host
+<p>First, open an ssh connection using the <code class="language-plaintext highlighter-rouge">ControlMaster</code> mode:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh -M host
 </code></pre></div></div>
 
 <p>Next, for each image, we’ll:</p>
@@ -181,8 +181,8 @@
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for </span>image_file <span class="k">in</span> <span class="s2">"</span><span class="k">${</span><span class="nv">images</span><span class="p">[@]</span><span class="k">}</span><span class="s2">"</span><span class="p">;</span> <span class="k">do</span>
     
     <span class="c"># Determine it's destination folder</span>
-    <span class="nv">DATE</span><span class="o">=</span><span class="k">$(</span>exiftool <span class="nt">-T</span> <span class="nt">-createdate</span> <span class="nt">-d</span>  <span class="s2">"%Y-%m-%d"</span> image_file<span class="k">)</span>
-    <span class="nv">YEAR</span><span class="o">=</span><span class="k">$(</span>date <span class="nt">--date</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DATE</span><span class="s2">"</span> <span class="s2">"+%Y"</span><span class="k">)</span>
+    <span class="nv">DATE</span><span class="o">=</span><span class="si">$(</span>exiftool <span class="nt">-T</span> <span class="nt">-createdate</span> <span class="nt">-d</span>  <span class="s2">"%Y-%m-%d"</span> image_file<span class="si">)</span>
+    <span class="nv">YEAR</span><span class="o">=</span><span class="si">$(</span><span class="nb">date</span> <span class="nt">--date</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DATE</span><span class="s2">"</span> <span class="s2">"+%Y"</span><span class="si">)</span>
 
     <span class="c"># Ensure the destination exists using open ssh connection</span>
     ssh host <span class="s2">"mkdir -p ./Pictures/</span><span class="nv">$YEAR</span><span class="s2">/</span><span class="nv">$DATE</span><span class="s2">"</span>

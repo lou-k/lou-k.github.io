@@ -122,7 +122,7 @@
 </ul>
 
 <p>My final ffmpeg command is:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ffmpeg -i INPUT.mov -pix_fmt yuv420p -c:v libx264 -crf 18 -preset veryslow -tune stillimage -r 10 -acodec aac -b:v 48k -f mp4  -movflags +faststart OUTPUT.mp4
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ffmpeg -i INPUT.mov -pix_fmt yuv420p -c:v libx264 -crf 18 -preset veryslow -tune stillimage -r 10 -acodec aac -b:v 48k -f mp4  -movflags +faststart OUTPUT.mp4
 </code></pre></div></div>
 
 <p>This resulting files average less than a MB per minute, most of which is audio, but have hardly any artifacts in the video.</p>
