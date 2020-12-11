@@ -1,5 +1,112 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="https://lou.dev/feed.xml" rel="self" type="application/atom+xml" /><link href="https://lou.dev/" rel="alternate" type="text/html" /><updated>2020-12-06T07:40:29-05:00</updated><id>https://lou.dev/feed.xml</id><title type="html">Lou Kratz</title><subtitle>Lou Kratz is a research engineer who specializes in computer vision and machine learning.
-</subtitle><entry><title type="html">Copy and Organizing Files Over Existing SSH Connections</title><link href="https://lou.dev/blog/2020/copy-existing-ssh/" rel="alternate" type="text/html" title="Copy and Organizing Files Over Existing SSH Connections" /><published>2020-12-04T00:00:00-05:00</published><updated>2020-12-04T00:00:00-05:00</updated><id>https://lou.dev/blog/2020/copy-existing-ssh</id><content type="html" xml:base="https://lou.dev/blog/2020/copy-existing-ssh/">&lt;p&gt;Often, I find myself copying files via ssh to a remote machine, and then shelling into that machine to organize them (or vice versa). A good example of this is how I organize my photos: I organize them into directories named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YYYY/YYYY-MM-DD/&lt;/code&gt; based on the exif data of the file. For example:&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="https://lou.dev/feed.xml" rel="self" type="application/atom+xml" /><link href="https://lou.dev/" rel="alternate" type="text/html" /><updated>2020-12-11T06:36:23-05:00</updated><id>https://lou.dev/feed.xml</id><title type="html">Lou Kratz</title><subtitle>Lou Kratz is a research engineer who specializes in computer vision and machine learning.
+</subtitle><entry><title type="html">Introducing PiPhoto</title><link href="https://lou.dev/blog/2020/piphoto/" rel="alternate" type="text/html" title="Introducing PiPhoto" /><published>2020-12-10T00:00:00-05:00</published><updated>2020-12-10T00:00:00-05:00</updated><id>https://lou.dev/blog/2020/piphoto</id><content type="html" xml:base="https://lou.dev/blog/2020/piphoto/">&lt;p&gt;I spend nearly every weekend with my SLR camera, but the last thing I want to do when I get home is pull out my computer to upload, organize, and backup the photos.
+I just feels like &lt;em&gt;work&lt;/em&gt;. I know newer cameras have WiFi and all that, but my trusty D3300 isn’t going to be replaced anytime soon.
+That’s where I got the idea for PiPhoto.&lt;/p&gt;
+
+&lt;h1 id=&quot;piphoto&quot;&gt;PiPhoto&lt;/h1&gt;
+&lt;p&gt;PiPhoto makes your raspberry pi automatically upload your photos when you insert your SD card.&lt;/p&gt;
+
+&lt;p&gt;Here is a video showing PiPhoto uploading photos to OSX:&lt;/p&gt;
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/_iZTsNLnoRM&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;In this post, I’ll discuss the core components and challenges I faced. I’ve open-sourced the project on &lt;a href=&quot;https://github.com/lou-k/pi-photo-sync&quot;&gt;Github&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;mounting-the-sd-card-on-insert&quot;&gt;Mounting the SD Card on Insert&lt;/h2&gt;
+&lt;p&gt;The first challenge I faced was how to automatically mount the sd card when it is inserted inserted into the Raspberry Pi.
+&lt;a href=&quot;https://opensource.com/article/18/11/udev&quot;&gt;UDev&lt;/a&gt; is the commonly accepted way to do this. 
+With some help from the &lt;a href=&quot;https://wiki.archlinux.org/index.php/udev#Mounting_drives_in_rules&quot;&gt;Arch Wiki&lt;/a&gt;, I settled upon this rule:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;99-mediastorage_card_instert_run.rules&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ACTION==&quot;add&quot;, SUBSYSTEMS==&quot;usb&quot;, SUBSYSTEM==&quot;block&quot;, ENV{ID_FS_USAGE}==&quot;filesystem&quot;, RUN{program}+=&quot;/usr/bin/systemd-mount --no-block --automount=no $devnode /media&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This tells the system to mount any filesystem block device to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/media&lt;/code&gt; when it is inserted into the USB port. Just pop that file into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/udev/rules.d/&lt;/code&gt; and you’re good to go.&lt;/p&gt;
+
+&lt;h2 id=&quot;triggering-a-command-on-mount&quot;&gt;Triggering A Command on Mount&lt;/h2&gt;
+&lt;p&gt;Once the sd card is mounted, I wanted to trigger a command to be run that would upload the photos to my computer, cloud, whatever. Though &lt;a href=&quot;https://www.freedesktop.org/wiki/Software/systemd/&quot;&gt;systemd&lt;/a&gt; is controversial, I found it was pretty easy to write a quick service that did just that:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;piphoto.service&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Unit]
+Description=PiPhoto Trigger on Usb Mount
+Requires=media.mount
+After=media.mount
+
+[Service]
+ExecStart=/usr/local/bin/piphoto
+Type=oneshot
+
+[Install]
+WantedBy=media.mount
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This systemd service triggers the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;piphoto&lt;/code&gt; command to execute when the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/media&lt;/code&gt; directory is mounted.&lt;/p&gt;
+
+&lt;h2 id=&quot;un-mounting-when-the-job-is-finished&quot;&gt;Un-Mounting When The Job is Finished&lt;/h2&gt;
+&lt;p&gt;Once the media are uploaded, I wanted the pi to unmount the sd card. This actually turned out to be a bit tricky: If the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;piphoto&lt;/code&gt; command called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unmount&lt;/code&gt;, then systemd would kill the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;piphoto.service&lt;/code&gt;, and it would report an error. Alternatively, if you have the systemd service call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;umount&lt;/code&gt; after exit using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ExecStartPost&lt;/code&gt;, then it catches the cyclic logic and throws an error.&lt;/p&gt;
+
+&lt;p&gt;My solution was to have the systemd process unmount the drive, but do so in a different process. A quick and easy way to achieve this was to use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;at&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Service]
+ExecStart=/usr/local/bin/piphoto
+Type=oneshot
+ExecStartPost=/bin/bash -c 'echo &quot;systemd-umount /media&quot; | at now'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is a bit of a hack, so I’m open to better solutions :D.&lt;/p&gt;
+
+&lt;h2 id=&quot;adding-led-feedback&quot;&gt;Adding LED Feedback&lt;/h2&gt;
+&lt;p&gt;Okay, so now I have the pi:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;mounting the sd card when inserted&lt;/li&gt;
+  &lt;li&gt;executing the piphoto command&lt;/li&gt;
+  &lt;li&gt;umounting the sd card when complete&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Next, I wanted to add some user feedback so I know if the job failed. To do this, I leveraged the pi’s on-board LEDs.&lt;/p&gt;
+
+&lt;p&gt;As noted in the &lt;a href=&quot;https://mlagerberg.gitbooks.io/raspberry-pi/content/5.2-leds.html&quot;&gt;Pi Docs&lt;/a&gt;, you can change how the LED behaves by sending a string to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/sys/class/leds/led{number}/trigger&lt;/code&gt;.  There are a number of different options such as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;timer&lt;/code&gt; to flash the led and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;default-on&lt;/code&gt; to keep it steady.&lt;/p&gt;
+
+&lt;p&gt;First, I made the green light flash while the photos were uploading:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;echo timer | tee /sys/class/leds/led0/trigger
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;and solid green when the syncing was complete:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;echo 'default-on' | tee  /sys/class/leds/led0/trigger &amp;gt; /dev/null
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, I wanted the red led to flash if the sync command failed.  Putting this all together into the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pihole&lt;/code&gt; script:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+# start flashing the green led
+echo timer | tee /sys/class/leds/led0/trigger
+
+# upload the files
+rsync -rav -e ssh /media ...
+sync_status=$?
+
+# Indicate success or failure
+if [ $sync_status -eq 0 ] ; then
+    # sync successful
+    echo 'default-on' | tee  /sys/class/leds/led0/trigger &amp;gt; /dev/null
+else
+    # sync failure
+    echo 'none' | tee /sys/class/leds/led0/trigger &amp;gt; /dev/null
+    echo timer | tee /sys/class/leds/led1/trigger &amp;gt; /dev/null
+fi
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;using-in-practice&quot;&gt;Using in Practice&lt;/h2&gt;
+
+&lt;p&gt;Above I’ve detailed the basics of how &lt;a href=&quot;https://github.com/lou-k/pi-photo-sync&quot;&gt;PiPhoto&lt;/a&gt; works. In the open-source release, you can easily change the sync command to fit your needs. I’ve included guides for:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/lou-k/pi-photo-sync/tree/main/destinations/osx-lightroom-classic&quot;&gt;Uploading to OSX for use with Lightroom Classic&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/lou-k/pi-photo-sync/tree/main/destinations/ssh-copy-and-organize&quot;&gt;Organizing By Date While Copying Over SSH&lt;/a&gt; which I discussed in &lt;a href=&quot;http://localhost:4000/blog/2020/copy-existing-ssh/&quot;&gt;this blog post&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In addition, I added error handling and a Udev rule to reset the leds when you remove your SD card.&lt;/p&gt;
+
+&lt;p&gt;I’ve already found PiPhoto to be a great convenience in my life. I hope you do too! If you find problems or have ideas, please hit up the &lt;a href=&quot;https://github.com/lou-k/pi-photo-sync/issues&quot;&gt;issue&lt;/a&gt; tracker on github.&lt;/p&gt;</content><author><name></name></author><summary type="html">I spend nearly every weekend with my SLR camera, but the last thing I want to do when I get home is pull out my computer to upload, organize, and backup the photos. I just feels like work. I know newer cameras have WiFi and all that, but my trusty D3300 isn’t going to be replaced anytime soon. That’s where I got the idea for PiPhoto.</summary></entry><entry><title type="html">Copy and Organizing Files Over Existing SSH Connections</title><link href="https://lou.dev/blog/2020/copy-existing-ssh/" rel="alternate" type="text/html" title="Copy and Organizing Files Over Existing SSH Connections" /><published>2020-12-04T00:00:00-05:00</published><updated>2020-12-04T00:00:00-05:00</updated><id>https://lou.dev/blog/2020/copy-existing-ssh</id><content type="html" xml:base="https://lou.dev/blog/2020/copy-existing-ssh/">&lt;p&gt;Often, I find myself copying files via ssh to a remote machine, and then shelling into that machine to organize them (or vice versa). A good example of this is how I organize my photos: I organize them into directories named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YYYY/YYYY-MM-DD/&lt;/code&gt; based on the exif data of the file. For example:&lt;/p&gt;
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;2020
 ├── 2020-11-01
 │   ├── DSC_0536.NEF
@@ -173,4 +280,4 @@
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ffmpeg -i INPUT.mov -pix_fmt yuv420p -c:v libx264 -crf 18 -preset veryslow -tune stillimage -r 10 -acodec aac -b:v 48k -f mp4  -movflags +faststart OUTPUT.mp4
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;This resulting files average less than a MB per minute, most of which is audio, but have hardly any artifacts in the video.&lt;/p&gt;</content><author><name></name></author><summary type="html">Last spring I was teaching Introduction to Computer Vision at Drexel when COVID-19 hit and, well, everyone had to adjust quickly. While my course always had an online section, I decided to make all of my lectures asynchronous in to provide maximum flexibility to students (and myself).</summary></entry><entry><title type="html">AI All Around How Curalate Accelerates Your Workflow</title><link href="https://lou.dev/blog/2018/ai-curalate/" rel="alternate" type="text/html" title="AI All Around How Curalate Accelerates Your Workflow" /><published>2018-10-09T00:00:00-04:00</published><updated>2018-10-09T00:00:00-04:00</updated><id>https://lou.dev/blog/2018/ai-curalate</id><content type="html" xml:base="https://lou.dev/blog/2018/ai-curalate/"></content><author><name></name></author><summary type="html"></summary></entry><entry><title type="html">Uploading EC2 Logs to S3 on Shutdown</title><link href="https://lou.dev/blog/2018/e2-logs/" rel="alternate" type="text/html" title="Uploading EC2 Logs to S3 on Shutdown" /><published>2018-09-04T00:00:00-04:00</published><updated>2018-09-04T00:00:00-04:00</updated><id>https://lou.dev/blog/2018/e2-logs</id><content type="html" xml:base="https://lou.dev/blog/2018/e2-logs/"></content><author><name></name></author><summary type="html"></summary></entry><entry><title type="html">How Curalate uses MXNet on AWS for Deep Learning Magic</title><link href="https://lou.dev/blog/2018/mxnet/" rel="alternate" type="text/html" title="How Curalate uses MXNet on AWS for Deep Learning Magic" /><published>2018-07-27T00:00:00-04:00</published><updated>2018-07-27T00:00:00-04:00</updated><id>https://lou.dev/blog/2018/mxnet</id><content type="html" xml:base="https://lou.dev/blog/2018/mxnet/"></content><author><name></name></author><category term="computer" /><category term="vision" /><category term="deep" /><category term="machine" /><category term="learning" /><category term="curalate" /><category term="mxnet" /><category term="agile" /><summary type="html"></summary></entry><entry><title type="html">R&amp;amp;D At Curalate: A Case Study of Deep Metric Embedding</title><link href="https://lou.dev/blog/2018/deep-metric-embedding/" rel="alternate" type="text/html" title="R&amp;amp;D At Curalate: A Case Study of Deep Metric Embedding" /><published>2018-02-01T05:11:36-05:00</published><updated>2018-02-01T05:11:36-05:00</updated><id>https://lou.dev/blog/2018/deep-metric-embedding</id><content type="html" xml:base="https://lou.dev/blog/2018/deep-metric-embedding/"></content><author><name></name></author><category term="computer" /><category term="vision" /><category term="deep" /><category term="metric" /><category term="machine" /><category term="learning" /><summary type="html"></summary></entry><entry><title type="html">Content Based Intelligent Cropping</title><link href="https://lou.dev/blog/2017/content-based-intelligent-cropping/" rel="alternate" type="text/html" title="Content Based Intelligent Cropping" /><published>2017-04-13T01:11:36-04:00</published><updated>2017-04-13T01:11:36-04:00</updated><id>https://lou.dev/blog/2017/content-based-intelligent-cropping</id><content type="html" xml:base="https://lou.dev/blog/2017/content-based-intelligent-cropping/"></content><author><name></name></author><category term="python" /><category term="notebook" /><category term="vision" /><category term="intelligent" /><category term="cropping" /><category term="smart" /><category term="product" /><category term="face" /><summary type="html"></summary></entry><entry><title type="html">Brewing EmojiNet</title><link href="https://lou.dev/blog/2016/emojinet/" rel="alternate" type="text/html" title="Brewing EmojiNet" /><published>2016-01-20T10:11:36-05:00</published><updated>2016-01-20T10:11:36-05:00</updated><id>https://lou.dev/blog/2016/emojinet</id><content type="html" xml:base="https://lou.dev/blog/2016/emojinet/"></content><author><name></name></author><category term="deep" /><category term="learning" /><category term="vision" /><category term="emoji" /><category term="convolutional" /><category term="neural" /><category term="network" /><summary type="html"></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://lou.dev/assets/2016-01-13-Emojinet/demo02.png" /><media:content medium="image" url="https://lou.dev/assets/2016-01-13-Emojinet/demo02.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Meet the Emojini 3000 – The Internet’s Premier Emoji Granting Genie</title><link href="https://lou.dev/blog/2015/emojini/" rel="alternate" type="text/html" title="Meet the Emojini 3000 – The Internet’s Premier Emoji Granting Genie" /><published>2015-12-17T00:00:00-05:00</published><updated>2015-12-17T00:00:00-05:00</updated><id>https://lou.dev/blog/2015/emojini</id><content type="html" xml:base="https://lou.dev/blog/2015/emojini/"></content><author><name></name></author><category term="emoji" /><category term="deep" /><category term="learning" /><category term="instagram" /><summary type="html"></summary></entry></feed>
+&lt;p&gt;This resulting files average less than a MB per minute, most of which is audio, but have hardly any artifacts in the video.&lt;/p&gt;</content><author><name></name></author><summary type="html">Last spring I was teaching Introduction to Computer Vision at Drexel when COVID-19 hit and, well, everyone had to adjust quickly. While my course always had an online section, I decided to make all of my lectures asynchronous in to provide maximum flexibility to students (and myself).</summary></entry><entry><title type="html">AI All Around How Curalate Accelerates Your Workflow</title><link href="https://lou.dev/blog/2018/ai-curalate/" rel="alternate" type="text/html" title="AI All Around How Curalate Accelerates Your Workflow" /><published>2018-10-09T00:00:00-04:00</published><updated>2018-10-09T00:00:00-04:00</updated><id>https://lou.dev/blog/2018/ai-curalate</id><content type="html" xml:base="https://lou.dev/blog/2018/ai-curalate/"></content><author><name></name></author><summary type="html"></summary></entry><entry><title type="html">Uploading EC2 Logs to S3 on Shutdown</title><link href="https://lou.dev/blog/2018/e2-logs/" rel="alternate" type="text/html" title="Uploading EC2 Logs to S3 on Shutdown" /><published>2018-09-04T00:00:00-04:00</published><updated>2018-09-04T00:00:00-04:00</updated><id>https://lou.dev/blog/2018/e2-logs</id><content type="html" xml:base="https://lou.dev/blog/2018/e2-logs/"></content><author><name></name></author><summary type="html"></summary></entry><entry><title type="html">How Curalate uses MXNet on AWS for Deep Learning Magic</title><link href="https://lou.dev/blog/2018/mxnet/" rel="alternate" type="text/html" title="How Curalate uses MXNet on AWS for Deep Learning Magic" /><published>2018-07-27T00:00:00-04:00</published><updated>2018-07-27T00:00:00-04:00</updated><id>https://lou.dev/blog/2018/mxnet</id><content type="html" xml:base="https://lou.dev/blog/2018/mxnet/"></content><author><name></name></author><category term="computer" /><category term="vision" /><category term="deep" /><category term="machine" /><category term="learning" /><category term="curalate" /><category term="mxnet" /><category term="agile" /><summary type="html"></summary></entry><entry><title type="html">R&amp;amp;D At Curalate: A Case Study of Deep Metric Embedding</title><link href="https://lou.dev/blog/2018/deep-metric-embedding/" rel="alternate" type="text/html" title="R&amp;amp;D At Curalate: A Case Study of Deep Metric Embedding" /><published>2018-02-01T05:11:36-05:00</published><updated>2018-02-01T05:11:36-05:00</updated><id>https://lou.dev/blog/2018/deep-metric-embedding</id><content type="html" xml:base="https://lou.dev/blog/2018/deep-metric-embedding/"></content><author><name></name></author><category term="computer" /><category term="vision" /><category term="deep" /><category term="metric" /><category term="machine" /><category term="learning" /><summary type="html"></summary></entry><entry><title type="html">Content Based Intelligent Cropping</title><link href="https://lou.dev/blog/2017/content-based-intelligent-cropping/" rel="alternate" type="text/html" title="Content Based Intelligent Cropping" /><published>2017-04-13T01:11:36-04:00</published><updated>2017-04-13T01:11:36-04:00</updated><id>https://lou.dev/blog/2017/content-based-intelligent-cropping</id><content type="html" xml:base="https://lou.dev/blog/2017/content-based-intelligent-cropping/"></content><author><name></name></author><category term="python" /><category term="notebook" /><category term="vision" /><category term="intelligent" /><category term="cropping" /><category term="smart" /><category term="product" /><category term="face" /><summary type="html"></summary></entry><entry><title type="html">Brewing EmojiNet</title><link href="https://lou.dev/blog/2016/emojinet/" rel="alternate" type="text/html" title="Brewing EmojiNet" /><published>2016-01-20T10:11:36-05:00</published><updated>2016-01-20T10:11:36-05:00</updated><id>https://lou.dev/blog/2016/emojinet</id><content type="html" xml:base="https://lou.dev/blog/2016/emojinet/"></content><author><name></name></author><category term="deep" /><category term="learning" /><category term="vision" /><category term="emoji" /><category term="convolutional" /><category term="neural" /><category term="network" /><summary type="html"></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://lou.dev/assets/2016-01-13-Emojinet/demo02.png" /><media:content medium="image" url="https://lou.dev/assets/2016-01-13-Emojinet/demo02.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>

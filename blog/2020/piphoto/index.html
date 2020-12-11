@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Lou Kratz | Introducing PiPhoto</title>
+  <meta name="description" content="Lou Kratz is a research engineer who specializes in computer vision and machine learning.
+">
+
+  <link rel="shortcut icon" href="https://lou.dev/assets/img/favicon.ico">
+
+  <link rel="stylesheet" href="https://lou.dev/assets/css/main.css">
+  <link rel="canonical" href="https://lou.dev/blog/2020/piphoto/">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    
+    <span class="site-title">
+        
+        <strong>Lou</strong> Kratz
+    </span>
+    
+
+    <nav class="site-nav">
+      <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+      <div class="trigger">
+        <!-- About -->
+        <a class="page-link" href="https://lou.dev/">about</a>
+
+        <!-- Blog -->
+        <a class="page-link" href="https://lou.dev/blog/">blog</a>
+
+        <!-- Pages -->
+        
+          
+        
+          
+        
+          
+        
+          
+            <a class="page-link" href="https://lou.dev/publications/">publications</a>
+          
+        
+          
+            <a class="page-link" href="https://lou.dev/talks/">talks</a>
+          
+        
+          
+            <a class="page-link" href="https://lou.dev/teaching/">teaching</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+
+        <!-- CV link -->
+        <!-- <a class="page-link" href="https://lou.dev/assets/pdf/CV.pdf">vitae</a> -->
+
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Introducing PiPhoto</h1>
+    <p class="post-meta">December 10, 2020</p>
+  </header>
+
+  <article class="post-content">
+    <p>I spend nearly every weekend with my SLR camera, but the last thing I want to do when I get home is pull out my computer to upload, organize, and backup the photos.
+I just feels like <em>work</em>. I know newer cameras have WiFi and all that, but my trusty D3300 isn’t going to be replaced anytime soon.
+That’s where I got the idea for PiPhoto.</p>
+
+<h1 id="piphoto">PiPhoto</h1>
+<p>PiPhoto makes your raspberry pi automatically upload your photos when you insert your SD card.</p>
+
+<p>Here is a video showing PiPhoto uploading photos to OSX:</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/_iZTsNLnoRM" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+<p>In this post, I’ll discuss the core components and challenges I faced. I’ve open-sourced the project on <a href="https://github.com/lou-k/pi-photo-sync">Github</a>.</p>
+
+<h2 id="mounting-the-sd-card-on-insert">Mounting the SD Card on Insert</h2>
+<p>The first challenge I faced was how to automatically mount the sd card when it is inserted inserted into the Raspberry Pi.
+<a href="https://opensource.com/article/18/11/udev">UDev</a> is the commonly accepted way to do this. 
+With some help from the <a href="https://wiki.archlinux.org/index.php/udev#Mounting_drives_in_rules">Arch Wiki</a>, I settled upon this rule:</p>
+
+<p><code class="language-plaintext highlighter-rouge">99-mediastorage_card_instert_run.rules</code></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ACTION=="add", SUBSYSTEMS=="usb", SUBSYSTEM=="block", ENV{ID_FS_USAGE}=="filesystem", RUN{program}+="/usr/bin/systemd-mount --no-block --automount=no $devnode /media"
+</code></pre></div></div>
+
+<p>This tells the system to mount any filesystem block device to <code class="language-plaintext highlighter-rouge">/media</code> when it is inserted into the USB port. Just pop that file into <code class="language-plaintext highlighter-rouge">/etc/udev/rules.d/</code> and you’re good to go.</p>
+
+<h2 id="triggering-a-command-on-mount">Triggering A Command on Mount</h2>
+<p>Once the sd card is mounted, I wanted to trigger a command to be run that would upload the photos to my computer, cloud, whatever. Though <a href="https://www.freedesktop.org/wiki/Software/systemd/">systemd</a> is controversial, I found it was pretty easy to write a quick service that did just that:</p>
+
+<p><code class="language-plaintext highlighter-rouge">piphoto.service</code></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
+Description=PiPhoto Trigger on Usb Mount
+Requires=media.mount
+After=media.mount
+
+[Service]
+ExecStart=/usr/local/bin/piphoto
+Type=oneshot
+
+[Install]
+WantedBy=media.mount
+</code></pre></div></div>
+
+<p>This systemd service triggers the <code class="language-plaintext highlighter-rouge">piphoto</code> command to execute when the <code class="language-plaintext highlighter-rouge">/media</code> directory is mounted.</p>
+
+<h2 id="un-mounting-when-the-job-is-finished">Un-Mounting When The Job is Finished</h2>
+<p>Once the media are uploaded, I wanted the pi to unmount the sd card. This actually turned out to be a bit tricky: If the <code class="language-plaintext highlighter-rouge">piphoto</code> command called <code class="language-plaintext highlighter-rouge">unmount</code>, then systemd would kill the <code class="language-plaintext highlighter-rouge">piphoto.service</code>, and it would report an error. Alternatively, if you have the systemd service call <code class="language-plaintext highlighter-rouge">umount</code> after exit using <code class="language-plaintext highlighter-rouge">ExecStartPost</code>, then it catches the cyclic logic and throws an error.</p>
+
+<p>My solution was to have the systemd process unmount the drive, but do so in a different process. A quick and easy way to achieve this was to use <code class="language-plaintext highlighter-rouge">at</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Service]
+ExecStart=/usr/local/bin/piphoto
+Type=oneshot
+ExecStartPost=/bin/bash -c 'echo "systemd-umount /media" | at now'
+</code></pre></div></div>
+
+<p>This is a bit of a hack, so I’m open to better solutions :D.</p>
+
+<h2 id="adding-led-feedback">Adding LED Feedback</h2>
+<p>Okay, so now I have the pi:</p>
+<ul>
+  <li>mounting the sd card when inserted</li>
+  <li>executing the piphoto command</li>
+  <li>umounting the sd card when complete</li>
+</ul>
+
+<p>Next, I wanted to add some user feedback so I know if the job failed. To do this, I leveraged the pi’s on-board LEDs.</p>
+
+<p>As noted in the <a href="https://mlagerberg.gitbooks.io/raspberry-pi/content/5.2-leds.html">Pi Docs</a>, you can change how the LED behaves by sending a string to <code class="language-plaintext highlighter-rouge">/sys/class/leds/led{number}/trigger</code>.  There are a number of different options such as <code class="language-plaintext highlighter-rouge">timer</code> to flash the led and <code class="language-plaintext highlighter-rouge">default-on</code> to keep it steady.</p>
+
+<p>First, I made the green light flash while the photos were uploading:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo timer | tee /sys/class/leds/led0/trigger
+</code></pre></div></div>
+
+<p>and solid green when the syncing was complete:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo 'default-on' | tee  /sys/class/leds/led0/trigger &gt; /dev/null
+</code></pre></div></div>
+
+<p>Finally, I wanted the red led to flash if the sync command failed.  Putting this all together into the <code class="language-plaintext highlighter-rouge">pihole</code> script:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+# start flashing the green led
+echo timer | tee /sys/class/leds/led0/trigger
+
+# upload the files
+rsync -rav -e ssh /media ...
+sync_status=$?
+
+# Indicate success or failure
+if [ $sync_status -eq 0 ] ; then
+    # sync successful
+    echo 'default-on' | tee  /sys/class/leds/led0/trigger &gt; /dev/null
+else
+    # sync failure
+    echo 'none' | tee /sys/class/leds/led0/trigger &gt; /dev/null
+    echo timer | tee /sys/class/leds/led1/trigger &gt; /dev/null
+fi
+</code></pre></div></div>
+
+<h2 id="using-in-practice">Using in Practice</h2>
+
+<p>Above I’ve detailed the basics of how <a href="https://github.com/lou-k/pi-photo-sync">PiPhoto</a> works. In the open-source release, you can easily change the sync command to fit your needs. I’ve included guides for:</p>
+<ul>
+  <li><a href="https://github.com/lou-k/pi-photo-sync/tree/main/destinations/osx-lightroom-classic">Uploading to OSX for use with Lightroom Classic</a></li>
+  <li><a href="https://github.com/lou-k/pi-photo-sync/tree/main/destinations/ssh-copy-and-organize">Organizing By Date While Copying Over SSH</a> which I discussed in <a href="http://localhost:4000/blog/2020/copy-existing-ssh/">this blog post</a></li>
+</ul>
+
+<p>In addition, I added error handling and a Udev rule to reset the leds when you remove your SD card.</p>
+
+<p>I’ve already found PiPhoto to be a great convenience in my life. I hope you do too! If you find problems or have ideas, please hit up the <a href="https://github.com/lou-k/pi-photo-sync/issues">issue</a> tracker on github.</p>
+
+  </article>
+
+  
+
+</div>
+
+      </div>
+    </div>
+
+    <footer>
+
+  <div class="wrapper">
+    &copy; Copyright 2020 Lou Kratz.
+    
+    
+  </div>
+
+</footer>
+
+
+    <!-- Load jQuery -->
+<script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
+
+<!-- Load Common JS -->
+<script src="https://lou.dev/assets/js/common.js"></script>
+
+
+<!-- Load KaTeX -->
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.js"></script>
+<script src="https://lou.dev/assets/js/katex.js"></script>
+
+
+
+
+<!-- Include custom icon fonts -->
+<link rel="stylesheet" href="https://lou.dev/assets/css/fontawesome-all.min.css">
+<link rel="stylesheet" href="https://lou.dev/assets/css/academicons.min.css">
+<link rel="stylesheet" href="https://lou.dev/assets/css/github.css">
+
+<!-- Google Analytics -->
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-124061948-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+  </body>
+
+</html>
