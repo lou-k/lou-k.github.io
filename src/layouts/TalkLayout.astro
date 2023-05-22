@@ -3,8 +3,6 @@ import { TalkSchema } from "../content/config";
 import BaseLayout from "./BaseLayout.astro";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
-import LiteYouTubeEmbed from "react-lite-youtube-embed";
-import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 
 export interface Props extends TalkSchema {}
 
@@ -21,21 +19,31 @@ import { Image } from "@astrojs/image/components";
       {date && <time>{displayDate}</time>}
       {
         videoId ? (
-          <LiteYouTubeEmbed id={videoId} title={title} />
+          <iframe
+            width="100%"
+            height="480"
+            src={"https://www.youtube.com/embed/" + videoId}
+            title={title}
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
         ) : (
-          img && (
-            <img src={img} alt={title} width="80%" />
-          )
+          img && <img src={img} alt={title} width="80%" />
         )
       }
       <br />
       <div class="divider my-2"></div>
-      {slidesUrl && (
-        <sub>
-          <a href={slidesUrl}>Slides</a>
-          </sub>
-          <br />
-      )}
+      {
+        slidesUrl && (
+          <>
+            <sub>
+              <a href={slidesUrl}>Slides</a>
+            </sub>
+            <br />
+          </>
+        )
+      }
       <slot />
     </article>
   </main>
