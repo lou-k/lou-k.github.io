@@ -1,0 +1,42 @@
+---
+import { TalkSchema } from "../content/config";
+import BaseLayout from "./BaseLayout.astro";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
+
+export interface Props extends TalkSchema {}
+
+const { title, description, date, img, videoId, slidesUrl } = Astro.props;
+dayjs.extend(localizedFormat);
+const displayDate = dayjs(date).format("ll");
+import { Image } from "@astrojs/image/components";
+---
+
+<BaseLayout title={title} description={description} image={img}>
+  <main class="md:flex md:justify-center">
+    <article class="prose prose-lg max-w-[750px] prose-img:mx-auto">
+      <h1 class="title my-2 text-4xl font-bold">{title}</h1>
+      {date && <time>{displayDate}</time>}
+      {
+        videoId ? (
+          <LiteYouTubeEmbed id={videoId} title={title} />
+        ) : (
+          img && (
+            <img src={img} alt={title} width="80%" />
+          )
+        )
+      }
+      <br />
+      <div class="divider my-2"></div>
+      {slidesUrl && (
+        <sub>
+          <a href={slidesUrl}>Slides</a>
+          </sub>
+          <br />
+      )}
+      <slot />
+    </article>
+  </main>
+</BaseLayout>

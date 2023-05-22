@@ -1,0 +1,123 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HorizontalCard from "../components/HorizontalCard.astro";
+import { getCollection } from "astro:content";
+
+const talks = (await getCollection("talks")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const latest_talks = talks.slice(0, 3);
+---
+
+<BaseLayout>
+  <div class="pb-12 mt-5">
+    <!-- <div class="text-xl py-1">Hey there 👋</div> -->
+    <div class="text-5xl font-bold">Lou Kratz</div>
+    <div class="text-3xl py-3 font-bold">
+      AI Practitioner and Speaker
+    </div>
+    <div class="py-2">
+      <article>
+      <text class="text-lg">
+
+        <p>I’m a research engineer specializing in computer vision and machine learning. I spent most of my time on tech-transfer: figuring out how to build cutting edge research from the lab into real-world applications.</p>
+        <br />
+        <p>Currently, I work <a href="http://www.curalate.com">Curalate</a> where they let me build <a href="http://engineering.curalate.com/2018/02/01/deep-metric-embedding.html">cool apps</a>. 
+        Working at a startup lets me rapidly switch between various roles including researcher, software engineer, and data scientist.</p>
+        <br />
+        <p>Prior to Curalate, I received my PhD from <a href="http://drexel.edu/">Drexel University</a> under the mentorship of <a href="https://www.cs.drexel.edu/~kon/">Ko Nishino</a>. Periodically I <a href="/teaching">teach</a> Computer Vision and Computational Photography at Drexel.</p>
+        <br />
+        <p>When I’m not working, I enjoy photography, cooking, homebrewing, and fatherhood.</p>
+
+        <!-- I'm an AI practitioner building magical software.
+        
+        <br />
+        <br />
+        As a research engineer
+        specializing in computer vision and machine learning, I spent most of my
+        time on tech-transfer: figuring out how to build cutting edge research
+        from the lab into real-world applications. 
+        <br />
+        <br />
+        
+        I have a passion for startups
+        since they let me rapidly switch roles including scientific researcher,
+        software engineer, and data scientist. It also means I get to execute
+        and impact artificial-intelligence products from idea and feasibility
+        phase all the way to a full product.
+        <br />
+        <br />
+         Previously, I received my PhD from
+        Drexel University in computer vision. Periodically I serve as an adjunct
+        professor teaching graduate level computer vision. 
+        
+        <br />
+        <br />
+        I’m a research
+        engineer specializing in computer vision and machine learning. I spent
+        most of my time on tech-transfer: figuring out how to build cutting edge
+        research from the lab into real-world applications.
+        <br />
+        <br />
+        Currently, I work Curalate where they let me build cool apps. Working at
+        a startup lets me rapidly switch between various roles including researcher,
+        software engineer, and data scientist.
+        <br />
+        <br />
+        Prior to Curalate, I received my PhD from Drexel University under the mentorship
+        of Ko Nishino. Periodically I teach Computer Vision and Computational Photography
+        at Drexel. When I’m not working, I enjoy photography, cooking, homebrewing,
+        and fatherhood. -->
+      </text>
+    </article>
+    </div>
+  </div>
+
+  <!-- <div>
+      <div class="text-3xl w-full font-bold mb-2">My last projects {"</>"}</div>
+    </div>
+
+    <HorizontalCard
+      title="Demo Project 1"
+      img="/post_img.webp"
+      desc="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+      url="#"
+      badge="NEW"
+    />
+    <div class="divider my-0"></div>
+    <HorizontalCard
+    title="Demo Project 2"
+    img="/post_img.webp"
+    desc="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    url="#"
+  />
+    <div class="divider my-0"></div>
+    <HorizontalCard
+    title="Demo Project 3"
+    img="/post_img.webp"
+    desc="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    url="#"
+    badge="FOSS"
+  /> -->
+
+  <div>
+    <div class="text-3xl w-full font-bold mb-5 mt-10">Latest Talks</div>
+  </div>
+
+  {
+    latest_talks.map((talk) => (
+      <>
+        <HorizontalCard
+          title={talk.data.title}
+          img={talk.data.img}
+          desc={talk.data.description}
+          url={"/talks/" + talk.slug}
+          target="_self"
+          badge={talk.data.videoUrl && "Video"}
+        />
+        <div class="divider my-0" />
+      </>
+    ))
+  }
+</BaseLayout>

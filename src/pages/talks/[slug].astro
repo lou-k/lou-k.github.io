@@ -1,0 +1,32 @@
+---
+import { CollectionEntry, getCollection } from 'astro:content';
+import { TalkSchema } from '../../content/config';
+import PostLayout from '../../layouts/PostLayout.astro';
+import TalkLayout from '../../layouts/TalkLayout.astro';
+
+export async function getStaticPaths() {
+    const postEntries = await getCollection('talks');
+    return postEntries.map(entry => ( { 
+        params: { slug: entry.slug }, props: { entry },
+    } ));
+}
+
+interface Props {
+    entry: CollectionEntry<"talks">;
+}
+
+const { entry } = Astro.props;
+const post : TalkSchema = entry.data;
+const { Content } = await entry.render();
+---
+
+<TalkLayout 
+    title={post.title} 
+    description={post.description} 
+    date={post.date} 
+    img={post.img} 
+    videoId={post.videoId}
+    slidesUrl={post.slidesUrl}
+    >
+    <Content/>
+</TalkLayout>

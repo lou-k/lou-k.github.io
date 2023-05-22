@@ -1,0 +1,125 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TimeLineElement from "../components/cv/TimeLine.astro";
+import { Image } from "@astrojs/image/components";
+---
+
+<BaseLayout title="Publications">
+  <div>
+    <div class="text-3xl w-full font-bold mb-5">Publications</div>
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Patents</div>
+  </div>
+  <div class="time-line-container mb-10">
+    <TimeLineElement
+      title="Method and System for Clustering and Classifying Online Visual Informatione"
+      subtitle="Nicholas Aaron Shiftan, Apu Sorabh Gupta, Brendan William Lowry, and Louis Kratz III 2016. CURALATE Inc. Philadelphia, PA."
+      desc="[[pdf](https://patentimages.storage.googleapis.com/2a/c0/e2/b93b1ba694233f/US20160048849A1.pdf)] [[google](https://patents.google.com/patent/US20160048849A1/en)]"
+    />
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Defogging</div>
+  </div>
+  <div class="time-line-container mb-10">
+    <Image
+      aspectRatio={0.7}
+      width={300}
+      align="right"
+      src="/pub/defogged.jpg"
+    />
+    <TimeLineElement
+      title="Bayesian Defogging"
+      subtitle="Ko Nishino, Louis Kratz, and Stephen Lombardi"
+      subtitle2="_International Journal of Computer Vision 2012._"
+      desc="[[preprint](pub/KNishino_IJCV11_defog_preprint.pdf)] [[pub](http://www.springerlink.com/content/nq4x606239g2k770/)] [[code](https://vision.ist.i.kyoto-u.ac.jp/codeanddata/defog/index.html)]"
+    />
+    <br />
+    <TimeLineElement
+      title="Factorizing Scene Albedo and Depth from a Single Foggy Image"
+      subtitle="Louis Kratz and Ko Nishino"
+      subtitle2="_In Proceedings of the IEEE Computer Society International Conference on Computer Vision, 2009._"
+      desc="[[preprint](pub/LKratz_ICCV09.pdf)] [[code](https://vision.ist.i.kyoto-u.ac.jp/codeanddata/defog/index.html)]"
+    />
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Crowded Scenes</div>
+  </div>
+  <div class="time-line-container mb-10">
+    <p>
+      Unfortunatley I can not release the code or video for this project, however my <a href="/pub/phdthesis.pdf">thesis</a> has sufficient details for implementing the approach. You can see more results on <a href="https://vision.ist.i.kyoto-u.ac.jp/research/trackcrowd/">Ko Nishino’s page</a>.
+    </p>
+    <br />
+
+    <Image
+      aspectRatio={0.7}
+      width={300}
+      align="right"
+      src="/pub/tracking.jpg"
+    />
+
+    <TimeLineElement
+      title="Modeling Crowd Flow for Video Analysis of Crowded Scenes"
+      subtitle="Ko Nishino and Louis Kratz"
+      subtitle2="_In Modeling, Simulation and Visual Analysis of Crowds 2013._"
+      desc="[[pub](https://link.springer.com/chapter/10.1007/978-1-4614-8483-7_10)]"
+    />
+    <br />
+    <TimeLineElement
+      title="Visual Analysis of Videos of Crowded Scenes"
+      subtitle="Louis Kratz"
+      subtitle2="2012.PhD Thesis"
+      desc="[[pdf](/pub/phdthesis.pdf)]"
+    />
+    <br />
+    <TimeLineElement
+      title="Going with the Flow: Pedestrian Efficiency in Crowded Scenes"
+      subtitle="Louis Kratz and Ko Nishino"
+      subtitle2="In Proceedings of the European Conference on Computer Vision, 2012."
+      desc="[[preprint](/pub/LKratz_ECCV12_preprint.pdf)] [[pub](https://link.springer.com/chapter/10.1007/978-3-642-33765-9_40)]"
+    />
+    <br />
+    <TimeLineElement
+      title="Tracking Pedestrians Using Local Spatio-Temporal Motion Patterns in Extremely Crowded Scenes"
+      subtitle="Louis Kratz and Ko Nishino"
+      subtitle2="IEEE Transactions on Pattern Analysis and Machine Intelligence, 2012."
+      desc="[[pub](http://ieeexplore.ieee.org/document/5540149/)] [[preprint](/pub/LKratz_TPAMI11_preprint.pdf)]"
+    />
+    <br />
+    <TimeLineElement
+      title="Spatio-Temporal Motion Pattern Models of Extremely Crowded Scenes"
+      subtitle="Louis Kratz and Ko Nishino"
+      subtitle2="In Machine Learning for Vision-Based Motion Analysis 2011."
+      desc="[[pub](https://link.springer.com/chapter/10.1007/978-0-85729-057-1_10)]"
+    />
+    <br />
+    <TimeLineElement
+      title="Tracking with local spatio-temporal motion patterns in extremely crowded scenes"
+      subtitle="Louis Kratz and Ko Nishino"
+      subtitle2="In Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition, 2010."
+      desc="[[preprint](/pub/LKratz_CVPR10.pdf)]"
+    />
+    <br />
+    <TimeLineElement
+      title="Anomaly detection in extremely crowded scenes using spatio-temporal motion pattern models"
+      subtitle="Louis Kratz and Ko Nishino"
+      subtitle2="In Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition, 2009."
+      desc="[[preprint](/pub/LKratz_CVPR09.pdf)]"
+    />
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Miscellaneous</div>
+  </div>
+  <div class="time-line-container mb-10">
+    <TimeLineElement
+      title="Making Gestural Input from Arm-Worn Inertial Sensors More Practical"
+      subtitle="Louis Kratz, Daniel Morris, and T. Scott Saponas"
+      subtitle2="_In Proceedings of the SIGCHI Conference on Human Factors in Computing Systems 2012._"
+      desc="[[preprint](/pub/KratzGesturesCHI2012.pdf)] [[pub](https://dl.acm.org/citation.cfm?id=2208304)] [[supplemental](/pub/KratzCHI2012_supplemental.pdf)] [[slides](/talks/CHI-Gestures.pptx)]"
+    />
+  </div>
+</BaseLayout>

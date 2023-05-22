@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+REPO_NAME="lou-k.github.io"
+DST_REPO="git@github.com:lou-k/$REPO_NAME.git"
+# DST_BRANCH="master"
+
+TMPDIR=../$REPO_NAME
+
+if [ ! -e "$TMPDIR" ] ; then
+    echo "Cloning repo...."
+    git clone $DST_REPO $TMPDIR
+fi
+
+pushd .
+cd $TMPDIR
+git checkout master
+git pull origin master
+popd
+
+npm run build
+cp -r dist/* $TMPDIR
+rm -rf dist
+
+pushd .
+cd $TMPDIR
+git add .
+git commit -a -m "updates on $(date +"%Y-%m-%d")"
+git push origin master
+popd
