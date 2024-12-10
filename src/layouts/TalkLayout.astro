@@ -9,7 +9,6 @@ export interface Props extends TalkSchema {}
 const { title, description, date, img, videoId, slidesUrl } = Astro.props;
 dayjs.extend(localizedFormat);
 const displayDate = dayjs(date).format("ll");
-import { Image } from "@astrojs/image/components";
 ---
 
 <BaseLayout title={title} description={description} image={img}>

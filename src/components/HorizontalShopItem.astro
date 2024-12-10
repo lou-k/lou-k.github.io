@@ -12,7 +12,7 @@ const {
   custom_link = false,
   custom_link_label = "",
 } = Astro.props;
-import { Image } from "@astrojs/image/components";
+import { Image } from "astro:assets";
 ---
 
 <div class="rounded-lg bg-base-100 hover:shadow-xl transition ease-in-out hover:scale-[102%]">
@@ -23,6 +23,7 @@ import { Image } from "@astrojs/image/components";
           <Image
             aspectRatio="16:9"
             width={750}
+            inferSize={true}
             format="webp"
             src={img}
             alt={title}

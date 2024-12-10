@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import TimeLineElement from "../components/cv/TimeLine.astro";
-import { Image } from "@astrojs/image/components";
+import { Image } from "astro:assets";
 ---
 
 <BaseLayout title="Publications">
@@ -27,7 +27,9 @@ import { Image } from "@astrojs/image/components";
     <Image
       aspectRatio={0.7}
       width={300}
+      height={210}
       align="right"
+      alt="Defogged"
       src="/pub/defogged.jpg"
     />
     <TimeLineElement
@@ -58,6 +60,8 @@ import { Image } from "@astrojs/image/components";
       aspectRatio={0.7}
       width={300}
       align="right"
+      height={210}
+      alt="Croweded Scenes"
       src="/pub/tracking.jpg"
     />
 
